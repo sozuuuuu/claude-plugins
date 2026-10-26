@@ -99,6 +99,8 @@ type PendingEntry = {
 
 type GroupPolicy = {
   requireMention: boolean
+  /** Overrides requireMention for messages in this channel's threads. Default: same as requireMention. */
+  threadRequireMention?: boolean
   allowFrom: string[]
 }
 
@@ -283,7 +285,10 @@ async function gate(msg: Message): Promise<GateResult> {
   const policy = access.groups[channelId]
   if (!policy) return { action: 'drop' }
   const groupAllowFrom = policy.allowFrom ?? []
-  const requireMention = policy.requireMention ?? true
+  const channelRequireMention = policy.requireMention ?? true
+  const requireMention = msg.channel.isThread()
+    ? policy.threadRequireMention ?? channelRequireMention
+    : channelRequireMention
   if (groupAllowFrom.length > 0 && !groupAllowFrom.includes(senderId)) {
     return { action: 'drop' }
   }

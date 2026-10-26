@@ -66,6 +66,8 @@ In channels with `requireMention: true`, any of the following triggers the bot:
 - A reply to one of the bot's recent messages
 - A match against any regex in `mentionPatterns`
 
+Threads use their parent channel's entry. Set `threadRequireMention` on that entry to override `requireMention` for threads only, e.g. `"requireMention": true, "threadRequireMention": false` keeps the channel mention-only while threads respond to every message. There is no skill flag for it yet; edit `access.json` directly (re-running `group add` drops it).
+
 Example regex setup for a nickname trigger:
 
 ```
@@ -120,6 +122,9 @@ Configure outbound behavior with `/discord:access set <key> <value>`.
     "846209781206941736": {
       // true: respond only to @mentions and replies.
       "requireMention": true,
+      // Optional. Overrides requireMention inside this channel's threads.
+      // false: respond to every message in threads, but only to mentions in the channel itself.
+      "threadRequireMention": false,
       // Restrict triggers to these senders. Empty = any member (subject to requireMention).
       "allowFrom": []
     }

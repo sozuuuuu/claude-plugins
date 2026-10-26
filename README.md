@@ -17,7 +17,7 @@ claude --dangerously-load-development-channels plugin:discord@sozuuuuu
 
 | Plugin | Upstream | Changes |
 |---|---|---|
-| `discord` | [anthropics/claude-plugins-official `external_plugins/discord`](https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins/discord) | Adds a `create_thread` tool: creates a public thread in an allowlisted guild channel, either standalone or from an existing message (`message_id`), or a new post in an allowlisted forum channel (with `text` as its first message). It goes through the same outbound allowlist check as the other tools. See [anthropics/claude-plugins-official#1144](https://github.com/anthropics/claude-plugins-official/issues/1144). |
+| `discord` | [anthropics/claude-plugins-official `external_plugins/discord`](https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins/discord) | Adds a `create_thread` tool: creates a public thread in an allowlisted guild channel, either standalone or from an existing message (`message_id`), or a new post in an allowlisted forum channel (with `text` as its first message). It goes through the same outbound allowlist check as the other tools. See [anthropics/claude-plugins-official#1144](https://github.com/anthropics/claude-plugins-official/issues/1144). Also adds an optional per-channel `threadRequireMention` in `access.json` that overrides `requireMention` inside that channel's threads (see [ACCESS.md](plugins/discord/ACCESS.md#mention-detection)). |
 
 The `upstream` branch holds unmodified upstream copies; `main` merges it and adds the changes above. Synced upstream commits and the sync procedure are in [UPSTREAM.md](UPSTREAM.md).
 
