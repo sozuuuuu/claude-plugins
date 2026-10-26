@@ -13,7 +13,7 @@ claude plugin install discord@sozuuuuu
 |---|---|---|
 | `discord` | [anthropics/claude-plugins-official `external_plugins/discord`](https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins/discord) | Adds a `create_thread` tool: creates a public thread in an allowlisted guild channel, either standalone or from an existing message (`message_id`). It goes through the same outbound allowlist check as the other tools. See [anthropics/claude-plugins-official#1144](https://github.com/anthropics/claude-plugins-official/issues/1144). |
 
-The `upstream` branch holds unmodified upstream copies; `main` merges it and adds the changes above. Synced upstream commits are tracked in [UPSTREAM.md](UPSTREAM.md) (Japanese).
+The `upstream` branch holds unmodified upstream copies; `main` merges it and adds the changes above. Synced upstream commits and the sync procedure are in [UPSTREAM.md](UPSTREAM.md).
 
 ## License
 
