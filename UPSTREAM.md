@@ -6,7 +6,7 @@
 
 ## Changes in this fork
 
-- discord: adds the `create_thread` tool (create a standalone thread in a channel, or start one from an existing message). Version is `0.0.4-sozu.N`. If upstream issue #1144 lands, switch to the upstream implementation.
+- discord: adds the `create_thread` tool (create a standalone thread in a channel, start one from an existing message, or create a post in a forum channel with its first message). Version is `0.0.4-sozu.N`. If upstream issue #1144 lands, switch to the upstream implementation.
 
 ## Branches
 

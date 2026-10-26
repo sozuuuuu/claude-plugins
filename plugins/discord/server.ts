@@ -598,13 +598,17 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: 'create_thread',
       description:
-        'Create a public thread in an allowlisted guild channel. Pass message_id to start the thread from that message; omit it to create a standalone thread. Returns the thread id — use it as chat_id for reply/fetch_messages.',
+        'Create a public thread in an allowlisted guild channel, or a new post in an allowlisted forum channel. Pass message_id to start the thread from that message; omit it to create a standalone thread. Forum posts need text (their first message). Returns the thread id — use it as chat_id for reply/fetch_messages.',
       inputSchema: {
         type: 'object',
         properties: {
-          chat_id: { type: 'string', description: 'Parent channel id (not a thread).' },
-          name: { type: 'string', description: 'Thread name (max 100 chars).' },
-          message_id: { type: 'string', description: 'Optional message to start the thread from.' },
+          chat_id: { type: 'string', description: 'Parent channel id (text or forum channel, not a thread).' },
+          name: { type: 'string', description: 'Thread or post title (max 100 chars).' },
+          message_id: { type: 'string', description: 'Optional message to start the thread from (text channels only).' },
+          text: {
+            type: 'string',
+            description: 'First message (max 2000 chars). Required for forum channels; for text channels it is posted into the new thread.',
+          },
           auto_archive_minutes: {
             type: 'number',
             description: 'Archive after inactivity: 60, 1440 (default), 4320, or 10080.',
@@ -724,15 +728,32 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
         }
       }
       case 'create_thread': {
-        const ch = await fetchAllowedChannel(args.chat_id as string)
-        if (ch.isThread()) throw new Error('chat_id is already a thread — pass the parent channel')
-        if (!('threads' in ch)) throw new Error('channel does not support threads')
         const name = (args.name as string).slice(0, 100)
         const minutes = args.auto_archive_minutes as number | undefined
         const autoArchiveDuration = minutes && [60, 1440, 4320, 10080].includes(minutes) ? minutes : 1440
+        const text = args.text as string | undefined
+        if (text && text.length > MAX_CHUNK_LIMIT) throw new Error(`text too long: ${text.length} chars, max ${MAX_CHUNK_LIMIT}`)
+
+        // Forum channels aren't text-based, so they bypass fetchAllowedChannel
+        // but get the same allowlist check against access.groups.
+        const raw = await client.channels.fetch(args.chat_id as string)
+        if (raw && (raw.type === ChannelType.GuildForum || raw.type === ChannelType.GuildMedia)) {
+          if (!(raw.id in loadAccess().groups)) {
+            throw new Error(`channel ${raw.id} is not allowlisted — add via /discord:access`)
+          }
+          if (!text) throw new Error('text is required for forum channels (a post needs a first message)')
+          const post = await raw.threads.create({ name, autoArchiveDuration, message: { content: text } })
+          noteSent(post.id)
+          return { content: [{ type: 'text', text: `forum post created (id: ${post.id}, name: ${post.name})` }] }
+        }
+
+        const ch = await fetchAllowedChannel(args.chat_id as string)
+        if (ch.isThread()) throw new Error('chat_id is already a thread — pass the parent channel')
+        if (!('threads' in ch)) throw new Error('channel does not support threads')
         const thread = args.message_id
           ? await (await ch.messages.fetch(args.message_id as string)).startThread({ name, autoArchiveDuration })
           : await ch.threads.create({ name, autoArchiveDuration })
+        if (text) noteSent((await thread.send(text)).id)
         return { content: [{ type: 'text', text: `thread created (id: ${thread.id}, name: ${thread.name})` }] }
       }
       default:
