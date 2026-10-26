@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sozuuuuu",
+  "description": "Forks of official Claude Code plugins with small, generic additions (e.g. discord: create_thread)",
+  "owner": {
+    "name": "sozuuuuu"
+  },
+  "plugins": [
+    {
+      "name": "discord",
+      "description": "Discord messaging bridge (fork of claude-plugins-official/discord with create_thread).",
+      "category": "productivity",
+      "source": "./plugins/discord"
+    }
+  ]
+}
