@@ -7,6 +7,12 @@ claude plugin marketplace add sozuuuuu/claude-plugins
 claude plugin install discord@sozuuuuu
 ```
 
+Channels from non-official marketplaces are not on the research-preview allowlist, so `--channels plugin:discord@sozuuuuu` loads the tools but drops inbound messages. Start with the development flag instead:
+
+```sh
+claude --dangerously-load-development-channels plugin:discord@sozuuuuu
+```
+
 ## Plugins
 
 | Plugin | Upstream | Changes |
