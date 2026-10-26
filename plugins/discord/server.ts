@@ -595,6 +595,24 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ['channel'],
       },
     },
+    {
+      name: 'create_thread',
+      description:
+        'Create a public thread in an allowlisted guild channel. Pass message_id to start the thread from that message; omit it to create a standalone thread. Returns the thread id — use it as chat_id for reply/fetch_messages.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          chat_id: { type: 'string', description: 'Parent channel id (not a thread).' },
+          name: { type: 'string', description: 'Thread name (max 100 chars).' },
+          message_id: { type: 'string', description: 'Optional message to start the thread from.' },
+          auto_archive_minutes: {
+            type: 'number',
+            description: 'Archive after inactivity: 60, 1440 (default), 4320, or 10080.',
+          },
+        },
+        required: ['chat_id', 'name'],
+      },
+    },
   ],
 }))
 
@@ -704,6 +722,18 @@ mcp.setRequestHandler(CallToolRequestSchema, async req => {
         return {
           content: [{ type: 'text', text: `downloaded ${lines.length} attachment(s):\n${lines.join('\n')}` }],
         }
+      }
+      case 'create_thread': {
+        const ch = await fetchAllowedChannel(args.chat_id as string)
+        if (ch.isThread()) throw new Error('chat_id is already a thread — pass the parent channel')
+        if (!('threads' in ch)) throw new Error('channel does not support threads')
+        const name = (args.name as string).slice(0, 100)
+        const minutes = args.auto_archive_minutes as number | undefined
+        const autoArchiveDuration = minutes && [60, 1440, 4320, 10080].includes(minutes) ? minutes : 1440
+        const thread = args.message_id
+          ? await (await ch.messages.fetch(args.message_id as string)).startThread({ name, autoArchiveDuration })
+          : await ch.threads.create({ name, autoArchiveDuration })
+        return { content: [{ type: 'text', text: `thread created (id: ${thread.id}, name: ${thread.name})` }] }
       }
       default:
         return {
